@@ -411,25 +411,19 @@ class _dia_base(_data_matrix):
             return self._csr_container(self.shape, dtype=self.dtype)
 
         n_rows, n_cols = self.shape
-        max_nnz = self.nnz
+        n_nz = self.count_nonzero()
         # np.argsort always returns dtype=int, which can cause automatic dtype
         # expansion for everything else even if not needed (see gh19245), but
         # CSR wants common dtype for indices, indptr and shape, so care should
         # be taken to use appropriate indexing dtype throughout.
-        idx_dtype = self._get_index_dtype(maxval=max(max_nnz, n_rows, n_cols))
+        idx_dtype = self._get_index_dtype(maxval=max(n_nz, n_rows, n_cols))
         order = np.argsort(self.offsets).astype(idx_dtype, copy=False)
-        csr_data = np.empty(max_nnz, dtype=self.dtype)
-        indices = np.empty(max_nnz, dtype=idx_dtype)
+        csr_data = np.empty(n_nz, dtype=self.dtype)
+        indices = np.empty(n_nz, dtype=idx_dtype)
         indptr = np.empty(1 + n_rows, dtype=idx_dtype)
-        # Conversion eliminates explicit zeros and returns actual nnz.
-        nnz = dia_tocsr(n_rows, n_cols, *self.data.shape,
-                        self.offsets.astype(idx_dtype, copy=False), self.data,
-                        order, csr_data, indices, indptr)
-        # Shrink indexing dtype, if needed, and prune arrays.
-        idx_dtype = self._get_index_dtype(maxval=max(nnz, n_rows, n_cols))
-        csr_data = _prune_array(csr_data[:nnz])
-        indices = _prune_array(indices[:nnz].astype(idx_dtype, copy=False))
-        indptr = indptr.astype(idx_dtype, copy=False)
+        dia_tocsr(n_rows, n_cols, *self.data.shape,
+                  self.offsets.astype(idx_dtype, copy=False), self.data,
+                  order, csr_data, indices, indptr)
         out = self._csr_container((csr_data, indices, indptr),
                                   shape=self.shape, dtype=self.dtype)
         out.has_canonical_format = True

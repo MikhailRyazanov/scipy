@@ -280,34 +280,30 @@ I dia_count_nonzero(const I n_rows,
  *   I  order[n_diags]    - indices for traversing offsets[] in ascending order
  *
  * Output Arguments:
- *   T  csr_data[max_nnz] - CSR format data array for B
- *   I  indices[max_nnz]  - CSR format index array for B
+ *   T  csr_data[n_nz]    - CSR format data array for B
+ *   I  indices[n_nz]     - CSR format index array for B
  *   I  indptr[n_rows+1]  - CSR format index pointer array for B
- *
- * Return Value:
- *   I  nnz               - number of (non-zero) values stored in B
  *
  * Note:
  *   Output arrays csr_data, indices and indptr must be preallocated and have
- *   sufficient size (with max_nnz >= nnz == A.count_nonzero()), then resulting
- *   arrays csr_data and indices must be truncated to the actual size returned
- *   as nnz
+ *   correct sizes, with n_nz == A.count_nonzero()
  *
  * Note:
- *   Output has canonical CSR format (sorted indices and no duplicates)
+ *   Output has canonical CSR format (sorted indices and no duplicates),
+ *   without non-zero entries
  *
  */
 template <class I, class T>
-I dia_tocsr(const I n_rows,
-            const I n_cols,
-            const I n_diags,
-            const I L,
-            const I offsets[],
-            const T data[],
-            const I order[],
-                  T csr_data[],
-                  I indices[],
-                  I indptr[])
+void dia_tocsr(const I n_rows,
+               const I n_cols,
+               const I n_diags,
+               const I L,
+               const I offsets[],
+               const T data[],
+               const I order[],
+                     T csr_data[],
+                     I indices[],
+                     I indptr[])
 {
     const I j_end = min(L, n_cols); // columns limit
     indptr[0] = 0;
@@ -329,7 +325,6 @@ I dia_tocsr(const I n_rows,
         }
         indptr[1 + i] = nnz;
     }
-    return nnz; // actual output lengths
 }
 
 
