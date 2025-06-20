@@ -228,6 +228,45 @@ void dia_matvecs(const I A_rows,
 
 
 /*
+ * Count non-zero entries in DIA matrix A
+ *
+ *
+ * Input Arguments:
+ *   I  n_rows            - number of rows in A
+ *   I  n_cols            - number of columns in A
+ *   I  n_diags           - number of diagonals in A
+ *   I  L                 - length of each diagonal in A
+ *   I  offsets[n_diags]  - diagonal offsets in A
+ *   T  data[n_diags,L]   - diagonals data of A (in C order)
+ *
+ * Return Value:
+ *   I  nz                - number of non-zero entries in A
+ *
+ */
+template <class I, class T>
+I dia_count_nonzero(const I n_rows,
+                    const I n_cols,
+                    const I n_diags,
+                    const I L,
+                    const I offsets[],
+                    const T data[])
+{
+    const I diag_cols = min(L, n_cols);
+    I nz = 0;
+    for (I i = 0; i < n_diags; ++i) {
+        const T* diag = data + npy_intp(L) * i; // current diagonal
+        const I ofs = offsets[i],
+                j_beg = max<I>(0, ofs),
+                j_end = min(n_rows + ofs, diag_cols);
+        for (I j = j_beg; j < j_end; ++j)
+            if (diag[j])
+                ++nz;
+    }
+    return nz;
+}
+
+
+/*
  * Compute B = A for DIA matrix A, CSR matrix B
  *
  *

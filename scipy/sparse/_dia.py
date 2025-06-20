@@ -14,7 +14,9 @@ from ._sputils import (
     isdense, isscalarlike, isshape, upcast_char, getdtype, get_sum_dtype,
     validateaxis, check_shape
 )
-from ._sparsetools import dia_matmat, dia_matvec, dia_matvecs, dia_tocsr
+from ._sparsetools import (
+    dia_matmat, dia_matvec, dia_matvecs, dia_count_nonzero, dia_tocsr
+)
 
 
 class _dia_base(_data_matrix):
@@ -122,8 +124,8 @@ class _dia_base(_data_matrix):
             raise NotImplementedError(
                 "count_nonzero over an axis is not implemented for DIA format"
             )
-        mask = self._data_mask()
-        return np.count_nonzero(self.data[mask])
+        return dia_count_nonzero(*self.shape, *self.data.shape,
+                                 self.offsets, self.data)
 
     count_nonzero.__doc__ = _spbase.count_nonzero.__doc__
 

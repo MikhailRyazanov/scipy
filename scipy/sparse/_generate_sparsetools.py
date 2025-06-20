@@ -110,6 +110,7 @@ coo_matvec          v lIITT*T
 coo_matvec_nd       v llIITT*T
 coo_matmat_dense    v llIITT*T
 coo_matmat_dense_nd v lllIIITT*T
+dia_count_nonzero   i iiiiIT
 dia_tocsr           i iiiiITI*T*I*I
 dia_matmat          v iiiiITiiiIT*V*W
 dia_matvec          v iiiiITT*T

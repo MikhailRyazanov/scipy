@@ -5146,7 +5146,7 @@ class TestDIA(sparse_test_class(getset=False, slicing=False, slicing_assign=Fals
                  'overfilled longer-diagonal, out of order')]
 
     def test_getnnz(self):
-        for data, ofsets, nnz, ref, case in self.ill_cases():
+        for data, ofsets, nnz, _, case in self.ill_cases():
             for shape in [(2, 2), (0, 2), (2, 0)]:
                 if data is None:
                     A = self.dia_container(shape)
@@ -5159,6 +5159,20 @@ class TestDIA(sparse_test_class(getset=False, slicing=False, slicing_assign=Fals
     @pytest.mark.skip(reason='DIA stores extra zeros')
     def test_getnnz_axis(self):
         pass
+
+    def test_count_nonzero(self):
+        # test general cases
+        super().test_count_nonzero()
+        # test ill-constructed DIA
+        for data, ofsets, _, r, case in self.ill_cases():
+            for shape in [(2, 2), (0, 2), (2, 0)]:
+                if data is None:
+                    A = self.dia_container(shape)
+                else:
+                    A = self.dia_container((data, ofsets), shape=shape)
+                ref = np.array(r)[:shape[0], :shape[1]]
+                nz = np.count_nonzero(ref)
+                assert A.count_nonzero() == nz, 'case: ' + case
 
     def test_tocsr(self):
         # test bound checks (other pathological cases are tested by
